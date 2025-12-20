@@ -12,14 +12,14 @@
 <body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col items-center">
 
     <header class="w-full p-4 bg-gray-800 shadow-lg text-center sticky top-0 z-10 border-b border-gray-700 flex flex-col items-center justify-center">
-        <!-- SECCIÓN DE LOGO AGREGADA -->
-        <!-- Intenta cargar 'wmremove-transformed.jpg' o 'logo.png'. Si falla, muestra el texto alternativo -->
-        <img src="wmremove-transformed.jpg" 
+        <!-- SECCIÓN DE LOGO -->
+        <!-- Corrección: extensión .png -->
+        <img src="wmremove-transformed.png" 
              alt="NEUROGRAPHICS AI" 
              class="h-20 mb-2 object-contain rounded-md" 
              onerror="this.style.display='none'; document.getElementById('logo-fallback-text').classList.remove('hidden');">
         
-        <!-- Texto de respaldo si no hay imagen (CAMBIADO A NEUROGRAPHICS AI) -->
+        <!-- Texto de respaldo -->
         <h2 id="logo-fallback-text" class="hidden text-blue-300 font-bold text-lg mb-1 tracking-wide border border-blue-300/30 px-3 py-1 rounded bg-blue-900/20">
             NEUROGRAPHICS AI
         </h2>
@@ -30,20 +30,20 @@
     <main class="w-full max-w-md p-4 flex-grow flex flex-col gap-4">
         
         <!-- Configuración API -->
-        <div class="bg-gray-800 p-4 rounded-lg shadow border border-gray-700">
+        <div class="bg-gray-800 p-4 rounded-lg shadow border border-gray-700 relative overflow-hidden">
             <label class="text-xs text-gray-400 block mb-1">Tu API Key de Gemini:</label>
             <input type="password" id="apiKey" class="w-full bg-gray-900 text-white p-2 rounded border border-gray-600 mb-2 focus:border-blue-500 outline-none transition" placeholder="Pega tu API Key aquí...">
             
             <div class="flex gap-2">
-                <button id="checkModelsBtn" class="bg-gray-700 hover:bg-gray-600 text-white text-xs py-2 px-3 rounded border border-gray-500 flex-1 transition">
-                    🔍 Verificar Conexión
+                <!-- Botón oculto por defecto. Se activa con CTRL+SHIFT+L y password -->
+                <button id="checkModelsBtn" class="hidden bg-gray-700 hover:bg-gray-600 text-white text-xs py-2 px-3 rounded border border-gray-500 flex-1 transition border-l-4 border-l-yellow-500">
+                    🔐 ADMIN: Verificar y Elegir Modelo
                 </button>
             </div>
             
             <div id="modelSelectContainer" class="hidden mt-3">
                 <label class="text-xs text-green-400 block mb-1">Modelo detectado:</label>
                 <select id="modelSelect" class="w-full bg-gray-900 text-white p-2 rounded border border-green-500 text-sm">
-                    <!-- CAMBIO: Predeterminado gemini-2.5-flash -->
                     <option value="gemini-2.5-flash">gemini-2.5-flash (Recomendado)</option>
                 </select>
             </div>
@@ -65,7 +65,7 @@
             <img id="preview" class="hidden absolute inset-0 w-full h-full object-contain p-2 rounded z-10 bg-gray-900">
         </div>
 
-        <!-- Input Nombre del Paciente (Para el PDF) -->
+        <!-- Input Nombre del Paciente -->
         <div id="patientInfo" class="hidden animate-fade-in">
             <label class="text-xs text-gray-400 block mb-1">Nombre y Apellido (para el informe):</label>
             <input type="text" id="patientName" class="w-full bg-gray-800 text-white p-3 rounded border border-gray-600 focus:border-blue-500 outline-none" placeholder="Ej: Gabriel Hermani">
@@ -95,7 +95,6 @@
     </main>
 
     <script>
-        // Inicializar jsPDF
         const { jsPDF } = window.jspdf;
 
         const fileInput = document.getElementById('fileInput');
@@ -114,7 +113,27 @@
         let base64Image = "";
         let fileType = "image/jpeg";
 
-        // 1. VERIFICAR MODELOS
+        // --- SISTEMA DE SEGURIDAD ADMIN ---
+        document.addEventListener('keydown', (e) => {
+            // Combinación: Ctrl + Shift + L
+            if (e.ctrlKey && e.shiftKey && (e.key === 'L' || e.key === 'l')) {
+                e.preventDefault();
+                const password = prompt("🔒 Acceso Admin\nIngrese contraseña para selección manual de modelos:");
+                
+                if (password === "ELREPA2026") {
+                    checkModelsBtn.classList.remove('hidden');
+                    statusMsg.innerText = "Modo Admin Activado: Botón de modelos visible.";
+                    statusMsg.className = "text-xs mt-2 text-green-400";
+                    // Pequeña animación visual
+                    checkModelsBtn.classList.add('animate-pulse');
+                    setTimeout(() => checkModelsBtn.classList.remove('animate-pulse'), 1000);
+                } else {
+                    if (password !== null) alert("⛔ Contraseña incorrecta");
+                }
+            }
+        });
+
+        // 1. VERIFICAR MODELOS (Solo visible para admins)
         checkModelsBtn.addEventListener('click', async () => {
             const apiKey = apiKeyInput.value.trim();
             if (!apiKey) { statusMsg.innerText = "Falta la API Key"; return; }
@@ -162,13 +181,13 @@
             }
         });
 
-        // 3. GENERAR PDF AVANZADO
+        // 3. GENERAR PDF
         async function createPDF(analysisText, patientName) {
             const doc = new jsPDF();
             const pageWidth = doc.internal.pageSize.getWidth();
             const pageHeight = doc.internal.pageSize.getHeight();
             const margin = 20;
-            const maxContentHeight = pageHeight - margin; // Límite inferior
+            const maxContentHeight = pageHeight - margin;
             let y = 20; 
 
             // --- HEADER FUNCTION ---
@@ -179,7 +198,6 @@
                     doc.setFont("helvetica", "bold");
                     doc.setFontSize(16);
                     doc.setTextColor(44, 62, 80);
-                    // Título solicitado
                     doc.text("GRAFOLOGO CON IA", margin + 15, 27);
                     doc.setFontSize(10);
                     doc.setTextColor(127, 140, 141);
@@ -189,7 +207,7 @@
                 }
             };
 
-            // Página 1: Header Completo y Metadatos
+            // Página 1
             addHeader(true);
             y = 55;
 
@@ -198,7 +216,6 @@
             doc.setFontSize(10);
             doc.setTextColor(0, 0, 0);
             
-            // Fecha en formato "26 de octubre de 2023" usando la fecha real actual
             const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
             const date = new Date().toLocaleDateString('es-ES', dateOptions);
             
@@ -206,11 +223,9 @@
             doc.text(`REF: ${Math.floor(Math.random() * 10000)}/IA`, pageWidth - margin - 30, y);
             y += 6;
             
-            // Nombre del documento analizado
             doc.text(`DOCUMENTO ANALIZADO: Firma manuscrita de "${patientName || "Anónimo"}"`, margin, y);
             y += 6;
             
-            // Realizado por
             doc.text(`REALIZADO POR: PERITO GRAFÓLOGO CON INTELIGENCIA ARTIFICIAL`, margin, y);
             y += 12;
 
@@ -223,12 +238,11 @@
             doc.line(pageWidth / 2 - 25, y, pageWidth / 2 + 25, y);
             y += 10;
 
-            // --- CONTENIDO DEL INFORME ---
+            // --- CONTENIDO ---
             doc.setFont("helvetica", "normal");
             doc.setFontSize(11);
             doc.setTextColor(20, 20, 20);
 
-            // Limpiar Markdown
             const cleanText = analysisText
                 .replace(/\*\*/g, "") 
                 .replace(/\*/g, "-")
@@ -237,7 +251,6 @@
             const lines = doc.splitTextToSize(cleanText, pageWidth - (margin * 2));
 
             lines.forEach((line) => {
-                // Heurística MEJORADA para detectar títulos
                 const isTitle = 
                     line.length > 4 && 
                     line.length < 70 && 
@@ -248,22 +261,21 @@
 
                 const spaceNeeded = isTitle ? 30 : 6;
 
-                // Salto de página inteligente
                 if (y + spaceNeeded > maxContentHeight) {
                     doc.addPage();
-                    y = 30; // Margen superior en nuevas páginas
+                    y = 30;
                 }
 
                 if (isTitle) {
-                    y += 8; // Aire extra antes del título
+                    y += 8; 
                     if (y + 10 > maxContentHeight) { doc.addPage(); y = 30; }
 
                     doc.setFont("helvetica", "bold");
-                    doc.setTextColor(41, 128, 185); // Azul para títulos
+                    doc.setTextColor(41, 128, 185);
                     doc.text(line, margin, y);
                     
                     doc.setFont("helvetica", "normal");
-                    doc.setTextColor(20, 20, 20); // Negro suave
+                    doc.setTextColor(20, 20, 20);
                     y += 3; 
                 } else {
                     doc.text(line, margin, y);
@@ -271,19 +283,18 @@
                 y += 6;
             });
 
-            // --- DISCLAIMER AL FINAL ---
+            // --- DISCLAIMER ---
             const disclaimer = "Cabe destacar que la grafología es considerada una pseudociencia por la comunidad científica y carece de validación empírica robusta. Este análisis debe interpretarse con carácter orientativo y no como un dictamen irrefutable. Para una evaluación rigurosa y certera, se recomienda consultar a un profesional acreditado.";
             
             doc.setFontSize(7);
-            doc.setTextColor(100, 100, 100); // Gris claro
+            doc.setTextColor(100, 100, 100);
             const disclaimerLines = doc.splitTextToSize(disclaimer, pageWidth - (margin * 2));
             
-            // Calcular si entra en la página actual o necesita una nueva
             if (y + (disclaimerLines.length * 4) + 10 > maxContentHeight) {
                 doc.addPage();
-                y = pageHeight - 40; // Poner al fondo de la nueva página si está vacía
+                y = pageHeight - 40;
             } else {
-                y += 10; // Espacio antes del disclaimer
+                y += 10;
             }
             
             doc.text(disclaimerLines, margin, y);
@@ -303,7 +314,7 @@
         // 4. BOTÓN ANALIZAR
         analyzeBtn.addEventListener('click', async () => {
             const apiKey = apiKeyInput.value.trim();
-            // CAMBIO: Default fallback cambiado a gemini-2.5-flash
+            // Default: gemini-2.5-flash
             const model = modelSelectContainer.classList.contains('hidden') ? 'gemini-2.5-flash' : modelSelect.value;
             const name = patientNameInput.value.trim();
             
@@ -313,7 +324,6 @@
             loading.classList.remove('hidden');
             successMsg.classList.add('hidden');
 
-            // --- PROMPT MODIFICADO PARA MÁXIMA FIABILIDAD ---
             const promptText = `
                 Actúa como un Perito Grafólogo Forense. Tu prioridad es la OBJETIVIDAD y la PRECISIÓN.
                 Analiza la imagen de escritura manuscrita adjunta.
@@ -327,7 +337,7 @@
                 - NO uses Markdown (nada de negritas, títulos con #, ni tablas).
                 - Escribe en bloques de texto plano.
                 - Usa MAYÚSCULAS COMPLETAS SOLO para los TÍTULOS de las secciones principales.
-                - ¡MUY IMPORTANTE!: NO PONGAS PUNTOS AL FINAL DE LOS TÍTULOS EN MAYÚSCULAS. (Ejemplo: "1. INTRODUCCIÓN" es correcto. "1. INTRODUCCIÓN." es incorrecto).
+                - ¡MUY IMPORTANTE!: NO PONGAS PUNTOS AL FINAL DE LOS TÍTULOS EN MAYÚSCULAS.
 
                 ESTRUCTURA DEL INFORME:
                 1. IMPRESIÓN GLOBAL Y AMBIENTE GRÁFICO
