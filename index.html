@@ -13,7 +13,7 @@
     <header class="w-full p-4 bg-gray-800 shadow-lg text-center sticky top-0 z-10 border-b border-gray-700 flex flex-col items-center justify-center">
         <img src="wmremove-transformed.png" 
              alt="NEUROGRAPHICS AI" 
-             class="h-28 mb-2 object-contain rounded-md" 
+             class="h-44 mb-2 object-contain rounded-md" 
              onerror="this.style.display='none'; document.getElementById('logo-fallback-text').classList.remove('hidden');">
         
         <h2 id="logo-fallback-text" class="hidden text-blue-300 font-bold text-lg mb-1 tracking-wide border border-blue-300/30 px-3 py-1 rounded bg-blue-900/20">
@@ -83,6 +83,10 @@
 
     </main>
 
+    <footer class="w-full p-4 text-center text-gray-600 text-[10px] mt-auto">
+        <p>LOS DATOS SON PRIVADOS, SE USAN SOLO PARA ANALIZAR CON LA IA Y SE BORRAN AUTOMATICAMENTE.</p>
+    </footer>
+
     <script>
         const { jsPDF } = window.jspdf;
 
@@ -102,7 +106,6 @@
         let base64Image = "";
         let fileType = "image/jpeg";
 
-        // Deshabilitar clic derecho
         document.addEventListener('contextmenu', event => event.preventDefault());
 
         document.addEventListener('keydown', async (e) => {
