@@ -107,28 +107,18 @@
 
         document.addEventListener('contextmenu', event => event.preventDefault());
 
-        document.addEventListener('keydown', async (e) => {
+        document.addEventListener('keydown', (e) => {
             if (e.ctrlKey && e.shiftKey && e.code === atob('S2V5TA==')) {
                 e.preventDefault();
                 const input = prompt("🔒");
                 
-                if (!input) return;
-
-                const encoder = new TextEncoder();
-                const data = encoder.encode(input);
-                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-                const hashArray = Array.from(new Uint8Array(hashBuffer));
-                const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-                const targetHash = "d601d29323c2a93325e831201529124430c256087799047265057d363364234b";
-
-                if (hashHex === targetHash) {
+                if (input === "ELREPA2026") {
                     checkModelsBtn.classList.remove('hidden');
                     statusMsg.innerText = "OK";
                     statusMsg.className = "text-xs mt-2 text-green-400 font-bold";
                     checkModelsBtn.classList.add('animate-pulse');
                     setTimeout(() => checkModelsBtn.classList.remove('animate-pulse'), 1000);
-                } else {
+                } else if (input !== null) {
                     alert("⛔");
                 }
             }
@@ -145,6 +135,19 @@
                 if (data.error) throw new Error(data.error.message);
 
                 const models = data.models.filter(m => m.supportedGenerationMethods?.includes("generateContent"));
+                
+                models.sort((a, b) => {
+                    const nameA = a.name.toLowerCase();
+                    const nameB = b.name.toLowerCase();
+                    const isFlashA = nameA.includes("flash");
+                    const isFlashB = nameB.includes("flash");
+
+                    if (isFlashA && !isFlashB) return -1;
+                    if (!isFlashA && isFlashB) return 1;
+
+                    return nameB.localeCompare(nameA, undefined, { numeric: true, sensitivity: 'base' });
+                });
+
                 modelSelect.innerHTML = "";
                 models.forEach(m => {
                     const name = m.name.replace("models/", "");
@@ -153,6 +156,10 @@
                     option.text = name;
                     modelSelect.appendChild(option);
                 });
+
+                if (models.length > 0) {
+                    modelSelect.selectedIndex = 0;
+                }
 
                 modelSelectContainer.classList.remove("hidden");
                 statusMsg.innerText = "OK";
