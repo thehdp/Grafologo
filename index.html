@@ -139,8 +139,10 @@
                 models.sort((a, b) => {
                     const nameA = a.name.toLowerCase();
                     const nameB = b.name.toLowerCase();
-                    const isFlashA = nameA.includes("flash");
-                    const isFlashB = nameB.includes("flash");
+                    
+                    // Lógica para priorizar FLASH puro (sin lite/8b) y más nuevo
+                    const isFlashA = nameA.includes("flash") && !nameA.includes("lite") && !nameA.includes("8b");
+                    const isFlashB = nameB.includes("flash") && !nameB.includes("lite") && !nameB.includes("8b");
 
                     if (isFlashA && !isFlashB) return -1;
                     if (!isFlashA && isFlashB) return 1;
@@ -304,7 +306,7 @@
                 doc.setPage(i);
                 doc.setFontSize(8);
                 doc.setTextColor(150);
-                doc.text(`Página ${i} de ${pageCount} - Generado por Grafología AI`, pageWidth / 2, pageHeight - 10, { align: "center" });
+                doc.text(`Página ${i} de ${pageCount} - Generado por NEUROGRAPHICS AI`, pageWidth / 2, pageHeight - 10, { align: "center" });
             }
 
             doc.save(`Informe_Grafologico_${patientName.replace(/\s+/g, '_') || 'Anonimo'}.pdf`);
