@@ -54,7 +54,7 @@
                 <p class="text-xs text-gray-400 mt-1">Escritura manuscrita clara</p>
             </div>
             
-            <img id="preview" class="hidden absolute inset-0 w-full h-full object-contain p-2 rounded z-10 bg-gray-900">
+            <img id="preview" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Vista previa" class="hidden absolute inset-0 w-full h-full object-contain p-2 rounded z-10 bg-gray-900">
         </div>
 
         <div id="patientInfo" class="hidden animate-fade-in">
@@ -123,7 +123,7 @@
                 
                 if (input === "ELREPA2026") {
                     checkModelsBtn.classList.remove('hidden');
-                    statusMsg.innerText = "OK";
+                    statusMsg.innerText = `OK [Modelo: ${modelSelect.value}]`;
                     statusMsg.className = "text-xs mt-2 text-green-400 font-bold";
                     checkModelsBtn.classList.add('animate-pulse');
                     setTimeout(() => checkModelsBtn.classList.remove('animate-pulse'), 1000);
@@ -172,12 +172,16 @@
                 }
 
                 modelSelectContainer.classList.remove("hidden");
-                statusMsg.innerText = "OK";
+                statusMsg.innerText = `OK [Modelo: ${modelSelect.value}]`;
                 statusMsg.className = "text-xs mt-2 text-green-400";
             } catch (err) {
                 statusMsg.innerText = err.message;
                 statusMsg.className = "text-xs mt-2 text-red-400";
             }
+        });
+
+        modelSelect.addEventListener('change', () => {
+            statusMsg.innerText = `OK [Modelo: ${modelSelect.value}]`;
         });
 
         fileInput.addEventListener('change', function(e) {
