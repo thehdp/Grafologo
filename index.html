@@ -77,7 +77,15 @@
             <i class="fas fa-check-circle text-3xl text-green-500 mb-2"></i>
             <h3 class="text-lg font-bold text-green-400">¡Informe Creado!</h3>
             <p class="text-sm text-gray-300">La descarga del PDF debería haber comenzado.</p>
-            <button onclick="location.reload()" class="mt-4 text-xs text-blue-400 hover:underline">Analizar otra muestra</button>
+            
+            <!-- Mensaje de modelo usado (solo visible para admin) -->
+            <p id="adminModelDisplay" class="text-xs text-yellow-500 mt-2 font-mono border border-yellow-500/30 bg-yellow-500/10 p-1 rounded inline-block hidden">
+                <!-- Se llenará vía JS -->
+            </p>
+
+            <div class="mt-4">
+                <button onclick="location.reload()" class="text-xs text-blue-400 hover:underline">Analizar otra muestra</button>
+            </div>
         </div>
 
     </main>
@@ -101,6 +109,7 @@
         const patientInfo = document.getElementById('patientInfo');
         const successMsg = document.getElementById('successMsg');
         const patientNameInput = document.getElementById('patientName');
+        const adminModelDisplay = document.getElementById('adminModelDisplay');
 
         let base64Image = "";
         let fileType = "image/jpeg";
@@ -140,7 +149,6 @@
                     const nameA = a.name.toLowerCase();
                     const nameB = b.name.toLowerCase();
                     
-                    // Lógica para priorizar FLASH puro (sin lite/8b) y más nuevo
                     const isFlashA = nameA.includes("flash") && !nameA.includes("lite") && !nameA.includes("8b");
                     const isFlashB = nameB.includes("flash") && !nameB.includes("lite") && !nameB.includes("8b");
 
@@ -322,6 +330,7 @@
             analyzeBtn.classList.add('hidden');
             loading.classList.remove('hidden');
             successMsg.classList.add('hidden');
+            adminModelDisplay.classList.add('hidden'); // Reset
 
             const promptText = `
                 Actúa como un Perito Grafólogo Forense. Tu prioridad es la OBJETIVIDAD y la PRECISIÓN.
@@ -375,6 +384,12 @@
 
                 loading.classList.add('hidden');
                 successMsg.classList.remove('hidden');
+
+                // Mostrar modelo si es ADMIN (si el botón checkModelsBtn es visible)
+                if (!checkModelsBtn.classList.contains('hidden')) {
+                    adminModelDisplay.innerText = `[ADMIN] Modelo utilizado: ${model}`;
+                    adminModelDisplay.classList.remove('hidden');
+                }
 
             } catch (error) {
                 console.error(error);
